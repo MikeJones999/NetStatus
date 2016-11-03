@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Plugin.Connectivity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 using Xamarin.Forms;
+using Plugin.Connectivity.Abstractions;
 
 namespace NetStatus
 {
@@ -11,28 +13,31 @@ namespace NetStatus
     {
         public App()
         {
-            // The root page of your application
-            var content = new ContentPage
-            {
-                Title = "NetStatus",
-                Content = new StackLayout
-                {
-                    VerticalOptions = LayoutOptions.Center,
-                    Children = {
-                        new Label {
-                            HorizontalTextAlignment = TextAlignment.Center,
-                            Text = "Welcome to Xamarin Forms!"
-                        }
-                    }
-                }
-            };
+            //set the main page based upon the status of the connection
+            MainPage = CrossConnectivity.Current.IsConnected ?  (Page) new NetworkViewPage() : new NoNetworkPage();
 
-            MainPage = new NavigationPage(content);
+
+
+
         }
 
         protected override void OnStart()
         {
-            // Handle when your app starts
+            base.OnStart();
+            CrossConnectivity.Current.ConnectivityChanged += connectionChanged;
+        }
+
+        void connectionChanged(object sender, ConnectivityChangedEventArgs e)
+        {
+            //gets main page currently showing
+            Type currentPage = this.MainPage.GetType();
+            if (e.IsConnected && currentPage != typeof(NetworkViewPage))
+                this.MainPage = new NetworkViewPage();
+            else if (!e.IsConnected && currentPage != typeof(NoNetworkPage))
+            {
+                this.MainPage = new NoNetworkPage();
+            }
+
         }
 
         protected override void OnSleep()
