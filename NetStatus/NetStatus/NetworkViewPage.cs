@@ -1,30 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+
+using Plugin.Connectivity;
+using Plugin.Connectivity.Abstractions;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace NetStatus
 {
-    class NetworkViewPage : ContentPage
+    public partial class NetworkViewPage : ContentPage
     {
-
         public NetworkViewPage()
         {
-            BackgroundColor = Color.FromRgb(0xf0, 0xf0, 0xf0);
-            Content = new Label {
-
-                Text = "Connection Details",
-                TextColor = Color.FromRgb(0x40, 0x40, 0x40),
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center
-
-            };
-
-
-
+            InitializeComponent();
         }
 
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            ConnectionDetails.Text = CrossConnectivity.Current.ConnectionTypes.First().ToString();
+
+            CrossConnectivity.Current.ConnectivityChanged += UpdateNetworkInfo;
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+
+            CrossConnectivity.Current.ConnectivityChanged -= UpdateNetworkInfo;
+        }
+
+        private void UpdateNetworkInfo(object sender, ConnectivityChangedEventArgs e)
+        {
+            if (CrossConnectivity.Current != null && CrossConnectivity.Current.ConnectionTypes != null)
+            {
+                var connectionType = CrossConnectivity.Current.ConnectionTypes.FirstOrDefault();
+                ConnectionDetails.Text = connectionType.ToString();
+            }
+        }
     }
 }

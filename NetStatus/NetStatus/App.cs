@@ -15,10 +15,6 @@ namespace NetStatus
         {
             //set the main page based upon the status of the connection
             MainPage = CrossConnectivity.Current.IsConnected ?  (Page) new NetworkViewPage() : new NoNetworkPage();
-
-
-
-
         }
 
         protected override void OnStart()
